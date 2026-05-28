@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>English Vocab Trainer</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+<!-- Modal: API Key -->
+<div id="modal" class="modal-overlay">
+  <div class="modal-box">
+    <p class="modal-title">🔑 Chave da API Gemini</p>
+    <p class="modal-desc">
+      Cole sua chave do <strong>Google AI Studio</strong>.<br />
+      Ela fica salva no navegador — você só precisa fazer isso uma vez por dispositivo.
+    </p>
+    <input
+      class="modal-input"
+      type="text"
+      id="keyInput"
+      placeholder="AIzaSy..."
+      autocomplete="off"
+      autocorrect="off"
+      autocapitalize="none"
+      spellcheck="false"
+    />
+    <p class="modal-error" id="keyError"></p>
+    <button class="btn btn-primary" id="saveBtn">Salvar e começar</button>
+  </div>
+</div>
+
+<!-- App -->
+<div id="app" style="display:none; flex-direction:column; min-height:100vh;">
+  <header>
+    <div class="header-left"><span>🇬🇧</span> Vocab Trainer</div>
+    <button class="btn-link" id="changeKeyBtn">Trocar chave</button>
+  </header>
+
+  <main>
+    <!-- Word card -->
+    <div class="card">
+      <div class="label-small">Palavra sorteada</div>
+      <div class="word-display" id="wordDisplay"></div>
+      <div id="badgeDisplay"></div>
+      <p class="hint-text" id="instructionText"></p>
+    </div>
+
+    <!-- Hint area -->
+    <div id="hintArea"></div>
+
+    <!-- Input area -->
+    <div>
+      <textarea id="sentenceInput" rows="4" placeholder="Escreva sua frase em inglês..."></textarea>
+      <p class="ctrl-hint">Ctrl+Enter para enviar</p>
+      <div style="margin-top:10px;">
+        <button class="btn btn-primary" id="submitBtn">Enviar frase</button>
+        <button class="btn btn-success" id="nextBtn" style="display:none; margin-top:10px;">➡️ Próxima palavra</button>
+      </div>
+    </div>
+
+    <!-- Feedback area -->
+    <div id="feedbackArea"></div>
+  </main>
+
+  <footer>English Vocab Trainer &bull; powered by Gemini</footer>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

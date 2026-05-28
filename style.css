@@ -1,0 +1,160 @@
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+body {
+  font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+  background: #f1f5f9;
+  min-height: 100vh;
+  color: #1e293b;
+}
+
+/* ── Header ─────────────────────────────────── */
+header {
+  background: #fff;
+  border-bottom: 1px solid #e2e8f0;
+  padding: 12px 16px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+.header-left { display: flex; align-items: center; gap: 8px; font-size: 1.1rem; font-weight: 700; }
+.btn-link { background: none; border: none; cursor: pointer; font-size: 0.75rem; color: #94a3b8; }
+.btn-link:hover { color: #64748b; }
+
+/* ── Layout ──────────────────────────────────── */
+main {
+  padding: 20px 16px;
+  max-width: 520px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+/* ── Card ────────────────────────────────────── */
+.card {
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.06);
+}
+.label-small {
+  font-size: 0.65rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #94a3b8;
+  margin-bottom: 12px;
+}
+.word-display { font-size: 2.5rem; font-weight: 900; letter-spacing: -0.02em; }
+.hint-text { font-size: 0.85rem; color: #64748b; margin-top: 10px; }
+
+/* ── Badge ───────────────────────────────────── */
+.badge {
+  display: inline-block;
+  font-size: 0.8rem;
+  font-weight: 600;
+  padding: 4px 12px;
+  border-radius: 999px;
+  border: 1px solid;
+  margin-top: 10px;
+}
+.badge-green  { background: #ecfdf5; color: #065f46; border-color: #a7f3d0; }
+.badge-red    { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
+.badge-violet { background: #f5f3ff; color: #5b21b6; border-color: #ddd6fe; }
+
+/* ── Buttons ─────────────────────────────────── */
+.btn {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 14px;
+  font-size: 0.95rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: background 0.15s, opacity 0.15s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn-primary  { background: #7c3aed; color: #fff; }
+.btn-primary:hover:not(:disabled) { background: #6d28d9; }
+.btn-success  { background: #059669; color: #fff; }
+.btn-success:hover:not(:disabled) { background: #047857; }
+.btn-outline  { background: #f5f3ff; color: #6d28d9; border: 1px solid #ddd6fe; }
+.btn-outline:hover:not(:disabled) { background: #ede9fe; }
+
+/* ── Textarea ────────────────────────────────── */
+textarea {
+  width: 100%;
+  border: 2px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 14px;
+  font-size: 1rem;
+  font-family: inherit;
+  resize: none;
+  background: #fff;
+  color: #1e293b;
+  transition: border-color 0.15s;
+  outline: none;
+}
+textarea:focus    { border-color: #7c3aed; }
+textarea:disabled { background: #f8fafc; color: #94a3b8; }
+.ctrl-hint { font-size: 0.7rem; color: #cbd5e1; text-align: right; margin-top: 4px; }
+
+/* ── Feedback ────────────────────────────────── */
+.feedback-block { display: flex; flex-direction: column; gap: 10px; animation: fadeUp 0.35s ease; }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+.fb-item { border-radius: 12px; padding: 14px; border: 1px solid; }
+.fb-correct   { background: #ecfdf5; border-color: #a7f3d0; }
+.fb-improve   { background: #fffbeb; border-color: #fcd34d; }
+.fb-corrected { background: #eff6ff; border-color: #bfdbfe; }
+
+.fb-label { font-size: 0.65rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 6px; }
+.fb-correct   .fb-label { color: #065f46; }
+.fb-improve   .fb-label { color: #92400e; }
+.fb-corrected .fb-label { color: #1e40af; }
+
+.fb-text { font-size: 0.875rem; line-height: 1.5; }
+.fb-correct   .fb-text { color: #064e3b; }
+.fb-improve   .fb-text { color: #78350f; }
+.fb-corrected .fb-text { color: #1d4ed8; font-style: italic; font-weight: 500; }
+
+/* ── Hint card ───────────────────────────────── */
+.hint-card { background: #f5f3ff; border: 1px solid #ddd6fe; border-radius: 16px; padding: 16px; animation: fadeUp 0.35s ease; }
+.hint-tip  { font-size: 0.875rem; color: #3b0764; line-height: 1.5; margin-bottom: 10px; }
+.hint-section-label { font-size: 0.7rem; font-weight: 700; color: #7c3aed; margin-bottom: 4px; }
+.hint-examples { list-style: none; display: flex; flex-direction: column; gap: 4px; margin-bottom: 10px; }
+.hint-examples li { font-size: 0.85rem; color: #4c1d95; font-style: italic; }
+.hint-tags { display: flex; flex-wrap: wrap; gap: 6px; }
+.hint-tag  { background: #ddd6fe; color: #4c1d95; font-size: 0.75rem; font-weight: 600; padding: 3px 10px; border-radius: 999px; }
+
+/* ── Modal ───────────────────────────────────── */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+  padding: 16px;
+}
+.modal-box    { background: #fff; border-radius: 20px; box-shadow: 0 20px 60px rgba(0,0,0,0.25); width: 100%; max-width: 360px; padding: 24px; }
+.modal-title  { font-size: 1.2rem; font-weight: 700; margin-bottom: 6px; }
+.modal-desc   { font-size: 0.85rem; color: #64748b; margin-bottom: 16px; line-height: 1.5; }
+.modal-input  { width: 100%; border: 1px solid #cbd5e1; border-radius: 12px; padding: 12px 14px; font-size: 0.9rem; margin-bottom: 6px; outline: none; font-family: inherit; }
+.modal-input:focus { border-color: #7c3aed; box-shadow: 0 0 0 3px rgba(124,58,237,0.15); }
+.modal-error  { font-size: 0.8rem; color: #dc2626; min-height: 18px; margin-bottom: 10px; }
+
+/* ── Misc ────────────────────────────────────── */
+.spinner { display: inline-block; animation: spin 0.8s linear infinite; }
+@keyframes spin { to { transform: rotate(360deg); } }
+
+footer { text-align: center; font-size: 0.7rem; color: #cbd5e1; padding: 16px 0 24px; }
