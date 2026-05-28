@@ -1,5 +1,5 @@
-var GEMINI_MODEL = "gemini-2.0-flash";
-var LS_KEY = "gvt_key";
+var GROQ_MODEL = "llama-3.3-70b-versatile";
+var LS_KEY = "groq_key";
 
 // ── Storage helpers ───────────────────────────
 function lsGet(k) { try { return localStorage.getItem(k); } catch(e) { return null; } }
@@ -174,20 +174,26 @@ function newRound() {
 // ── API ───────────────────────────────────────
 function callGemini(systemPrompt, userPrompt) {
   return fetch(
-    "https://generativelanguage.googleapis.com/v1beta/models/" + GEMINI_MODEL + ":generateContent?key=" + apiKey,
+    "https://api.groq.com/openai/v1/chat/completions",
     {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": "Bearer " + apiKey
+      },
       body: JSON.stringify({
-        systemInstruction: { parts: [{ text: systemPrompt }] },
-        contents: [{ role: "user", parts: [{ text: userPrompt }] }],
-        generationConfig: { maxOutputTokens: 1024 }
+        model: GROQ_MODEL,
+        messages: [
+          { role: "system", content: systemPrompt },
+          { role: "user",   content: userPrompt }
+        ],
+        max_tokens: 1024
       })
     }
   ).then(function(res) {
     return res.json().then(function(data) {
       if (!res.ok) throw new Error(data.error && data.error.message ? data.error.message : "API error " + res.status);
-      return data.candidates[0].content.parts[0].text;
+      return data.choices[0].message.content;
     });
   });
 }
