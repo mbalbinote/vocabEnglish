@@ -77,6 +77,11 @@ var apiKey = lsGet(LS_KEY) || "";
 var currentWord = "";
 var currentType = null;
 var submitted = false;
+var currentHintData = null;
+
+// ── Notebook state ────────────────────────────
+var LS_NOTEBOOK = "vocab_notebook";
+var fcIndex     = 0;
 
 // ── DOM refs ──────────────────────────────────
 var modal           = document.getElementById("modal");
@@ -93,6 +98,19 @@ var sentenceInput   = document.getElementById("sentenceInput");
 var submitBtn       = document.getElementById("submitBtn");
 var nextBtn         = document.getElementById("nextBtn");
 var feedbackArea    = document.getElementById("feedbackArea");
+var saveWordBtn     = document.getElementById("saveWordBtn");
+var notebookFab     = document.getElementById("notebookFab");
+var notebookCount   = document.getElementById("notebookCount");
+var fcModal         = document.getElementById("fcModal");
+var fcCard          = document.getElementById("fcCard");
+var fcFront         = document.getElementById("fcFront");
+var fcBack          = document.getElementById("fcBack");
+var fcProgress      = document.getElementById("fcProgress");
+var fcTapHint       = document.getElementById("fcTapHint");
+var fcClose         = document.getElementById("fcClose");
+var fcPrev          = document.getElementById("fcPrev");
+var fcNext          = document.getElementById("fcNext");
+var fcDelete        = document.getElementById("fcDelete");
 
 // ── Helpers ───────────────────────────────────
 function pick(arr) { return arr[Math.floor(Math.random() * arr.length)]; }
@@ -110,7 +128,44 @@ function parseJSON(raw) {
     return null;
   }
 }
+// ── Notebook helpers ──────────────────────────
+function getNotebook() {
+  var raw = lsGet(LS_NOTEBOOK);
+  if (!raw) return [];
+  try { return JSON.parse(raw); } catch(e) { return []; }
+}
+function saveNotebook(arr) { lsSet(LS_NOTEBOOK, JSON.stringify(arr)); }
+function isWordSaved(w) { return getNotebook().some(function(e) { return e.word === w; }); }
 
+function updateFabCount() {
+  var n = getNotebook().length;
+  notebookCount.textContent = n;
+  notebookFab.style.display = n > 0 ? "flex" : "none";
+}
+
+function updateSaveBtn() {
+  if (isWordSaved(currentWord)) {
+    saveWordBtn.innerHTML = "✓ Salvo no caderno";
+    saveWordBtn.classList.add("saved");
+    saveWordBtn.disabled = true;
+  } else {
+    saveWordBtn.innerHTML = "📌 Salvar palavra";
+    saveWordBtn.classList.remove("saved");
+    saveWordBtn.disabled = false;
+  }
+}
+
+function showToast(msg) {
+  var t = document.createElement("div");
+  t.className = "toast";
+  t.textContent = msg;
+  document.body.appendChild(t);
+  setTimeout(function() { t.classList.add("toast-visible"); }, 10);
+  setTimeout(function() {
+    t.classList.remove("toast-visible");
+    setTimeout(function() { t.remove(); }, 300);
+  }, 2200);
+}
 // ── Modal ─────────────────────────────────────
 function openModal() {
   modal.style.display = "flex";
@@ -144,7 +199,39 @@ changeKeyBtn.addEventListener("click", function() {
   keyError.textContent = "";
   openModal();
 });
+saveWordBtn.addEventListener("click", function() {
+  if (isWordSaved(currentWord)) return;
+  var savedWord = currentWord;
+  if (currentHintData) {
+    doSaveWord(currentHintData);
+  } else {
+    saveWordBtn.disabled = true;
+    saveWordBtn.innerHTML = '<span class="spinner">⏳</span> Buscando dica...';
+    var sys = "You are a friendly English teacher helping intermediate Brazilian learners.\n" +
+      "Respond ONLY with a valid JSON object with:\n" +
+      "- \"tip\": 2-3 sentences about how natives use this word in real life\n" +
+      "- \"examples\": array of 3 short natural example sentences\n" +
+      "- \"phrasal\": array of 1-2 related phrasal verbs or expressions (or empty array)";
+    callGemini(sys, 'Word: "' + savedWord + '"')
+      .then(function(raw) {
+        var parsed = parseJSON(raw) || { tip: raw, examples: [], phrasal: [] };
+        currentHintData = parsed;
+        renderHint(parsed);
+        doSaveWord(parsed);
+      })
+      .catch(function() { updateSaveBtn(); });
+  }
+});
 
+function doSaveWord(hintObj) {
+  var nb = getNotebook();
+  if (nb.some(function(e) { return e.word === currentWord; })) { updateSaveBtn(); return; }
+  nb.push({ word: currentWord, tip: hintObj.tip || "", examples: hintObj.examples || [], phrasal: hintObj.phrasal || [], savedAt: Date.now() });
+  saveNotebook(nb);
+  updateFabCount();
+  updateSaveBtn();
+  showToast('"' + currentWord + '" salva no caderno! 📚');
+}
 // ── Game ──────────────────────────────────────
 function newRound() {
   currentWord = pick(WORDS);
@@ -164,6 +251,8 @@ function newRound() {
   submitBtn.innerHTML = "Enviar frase";
   nextBtn.style.display = "none";
   feedbackArea.innerHTML = "";
+  currentHintData = null;
+  updateSaveBtn();
 
   hintArea.innerHTML = '<button class="btn btn-outline" id="hintBtn">💡 Ver dica de uso</button>';
   document.getElementById("hintBtn").addEventListener("click", handleHint);
@@ -267,6 +356,7 @@ function handleHint() {
   callGemini(system, 'Word: "' + currentWord + '"')
     .then(function(raw) {
       var parsed = parseJSON(raw) || { tip: raw, examples: [], phrasal: [] };
+      currentHintData = parsed;
       renderHint(parsed);
     })
     .catch(function(e) {
@@ -294,6 +384,65 @@ function renderHint(obj) {
 }
 
 nextBtn.addEventListener("click", newRound);
+// ── Flashcard ─────────────────────────────────────────
+notebookFab.addEventListener("click", openFlashcards);
+fcClose.addEventListener("click", closeFlashcards);
+fcPrev.addEventListener("click", function() { navigateFC(-1); });
+fcNext.addEventListener("click", function() { navigateFC(1); });
+fcDelete.addEventListener("click", deleteCurrentFC);
+fcCard.addEventListener("click", flipFC);
 
+function openFlashcards() {
+  if (!getNotebook().length) return;
+  fcIndex = 0;
+  fcCard.classList.remove("fc-flipped");
+  fcModal.style.display = "flex";
+  renderFC();
+}
+function closeFlashcards() { fcModal.style.display = "none"; }
+
+function navigateFC(dir) {
+  var nb = getNotebook();
+  fcIndex = (fcIndex + dir + nb.length) % nb.length;
+  fcCard.classList.remove("fc-flipped");
+  fcTapHint.style.opacity = "1";
+  renderFC();
+}
+function flipFC() {
+  fcCard.classList.toggle("fc-flipped");
+  fcTapHint.style.opacity = fcCard.classList.contains("fc-flipped") ? "0" : "1";
+}
+function renderFC() {
+  var nb = getNotebook();
+  var e = nb[fcIndex];
+  fcProgress.textContent = (fcIndex + 1) + " / " + nb.length;
+  fcFront.innerHTML = '<div class="fc-word">' + escHtml(e.word) + '</div>';
+  var bhtml = '<p class="fc-tip">' + escHtml(e.tip) + '</p>';
+  if (e.examples && e.examples.length) {
+    bhtml += '<ul class="fc-examples">';
+    for (var i = 0; i < e.examples.length; i++) bhtml += '<li>"​' + escHtml(e.examples[i]) + '"</li>';
+    bhtml += '</ul>';
+  }
+  if (e.phrasal && e.phrasal.length) {
+    bhtml += '<div class="fc-tags">';
+    for (var j = 0; j < e.phrasal.length; j++) bhtml += '<span class="hint-tag">' + escHtml(e.phrasal[j]) + '</span>';
+    bhtml += '</div>';
+  }
+  fcBack.innerHTML = bhtml;
+  fcTapHint.style.opacity = "1";
+}
+function deleteCurrentFC() {
+  var nb = getNotebook();
+  var word = nb[fcIndex].word;
+  nb.splice(fcIndex, 1);
+  saveNotebook(nb);
+  updateFabCount();
+  if (word === currentWord) updateSaveBtn();
+  if (!nb.length) { closeFlashcards(); return; }
+  if (fcIndex >= nb.length) fcIndex = nb.length - 1;
+  fcCard.classList.remove("fc-flipped");
+  renderFC();
+}
 // ── Boot ──────────────────────────────────────
 if (apiKey) { closeModal(); newRound(); } else { openModal(); }
+updateFabCount();

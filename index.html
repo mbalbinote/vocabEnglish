@@ -46,6 +46,7 @@
       <div class="word-display" id="wordDisplay"></div>
       <div id="badgeDisplay"></div>
       <p class="hint-text" id="instructionText"></p>
+      <button class="btn-save-word" id="saveWordBtn">📌 Salvar palavra</button>
     </div>
 
     <!-- Hint area -->
@@ -65,7 +66,32 @@
     <div id="feedbackArea"></div>
   </main>
 
-  <footer>English Vocab Trainer &bull; powered by Gemini</footer>
+  <footer>English Vocab Trainer &bull; powered by Groq</footer>
+  <button class="notebook-fab" id="notebookFab" style="display:none;">
+    📚 <span id="notebookCount">0</span>
+  </button>
+</div>
+
+<!-- Flashcard Modal -->
+<div id="fcModal" class="modal-overlay" style="display:none;">
+  <div class="fc-container">
+    <div class="fc-header">
+      <span class="fc-progress" id="fcProgress">1 / 1</span>
+      <button class="fc-close" id="fcClose">✕</button>
+    </div>
+    <div class="fc-card" id="fcCard">
+      <div class="fc-card-inner">
+        <div class="fc-front" id="fcFront"></div>
+        <div class="fc-back" id="fcBack"></div>
+      </div>
+    </div>
+    <p class="fc-tap-hint" id="fcTapHint">Toque no card para ver a dica</p>
+    <div class="fc-nav">
+      <button class="btn-fc-nav" id="fcPrev">←</button>
+      <button class="btn-fc-delete" id="fcDelete">🗑 Remover</button>
+      <button class="btn-fc-nav" id="fcNext">→</button>
+    </div>
+  </div>
 </div>
 
 <script src="app.js"></script>
